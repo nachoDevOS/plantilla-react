@@ -130,7 +130,7 @@ export default function ExampleSales({ sales, filters, statusCounts, stats }: Pr
                             title="Últimas ventas"
                             description={`${sales.total} de ${allCount} ventas`}
                             aside={
-                                <div className="bg-muted flex rounded-lg p-0.5">
+                                <div className="bg-muted flex max-w-full overflow-x-auto rounded-lg p-0.5 [scrollbar-width:none]">
                                     {tabs.map((t) => (
                                         <button
                                             key={t.id}

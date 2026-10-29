@@ -11,7 +11,7 @@ import AppLogo from '@/components/shared/app-logo';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, Palette, Settings, ShieldCheck, Users } from 'lucide-react';
+import { ClipboardList, Contact, LayoutGrid, Package, Palette, Settings, Shapes, ShieldCheck, ShoppingCart, SquareKanban, Users } from 'lucide-react';
 
 // Grupo "Plataforma": lo ve todo usuario logueado
 const mainNavItems: NavItem[] = [
@@ -36,6 +36,17 @@ const adminNavItems: NavItem[] = [
         icon: ShieldCheck,
         permission: 'roles.ver',
     },
+];
+
+// Grupo "Ejemplos": pantallas de muestra con datos escritos a mano (routes/admin.php → examples).
+// Bórralo junto con pages/admin/examples/ cuando empieces tus propios módulos.
+const exampleNavItems: NavItem[] = [
+    { title: 'Productos', url: '/admin/examples/products', icon: Package },
+    { title: 'Ventas', url: '/admin/examples/sales', icon: ShoppingCart },
+    { title: 'Clientes', url: '/admin/examples/customers', icon: Contact },
+    { title: 'Tareas', url: '/admin/examples/tasks', icon: SquareKanban },
+    { title: 'Formulario', url: '/admin/examples/form', icon: ClipboardList },
+    { title: 'Componentes', url: '/admin/examples/components', icon: Shapes },
 ];
 
 // Enlaces de abajo del menú
@@ -73,6 +84,7 @@ export function AdminSidebar() {
 
             <SidebarContent>
                 <NavMain label="Plataforma" items={mainNavItems} />
+                <NavMain label="Ejemplos" items={exampleNavItems} />
                 <NavMain label="Administración" items={adminNavItems} />
             </SidebarContent>
 

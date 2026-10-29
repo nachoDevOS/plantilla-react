@@ -5,7 +5,23 @@
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { useCan } from '@/hooks/use-can';
 import { router } from '@inertiajs/react';
-import { type LucideIcon, KeyRound, LayoutGrid, Palette, Search, ShieldCheck, User, UserSearch, Users } from 'lucide-react';
+import {
+    type LucideIcon,
+    ClipboardList,
+    Contact,
+    KeyRound,
+    LayoutGrid,
+    Package,
+    Palette,
+    Search,
+    Shapes,
+    ShieldCheck,
+    ShoppingCart,
+    SquareKanban,
+    User,
+    UserSearch,
+    Users,
+} from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 interface CommandItem {
@@ -19,6 +35,12 @@ interface CommandItem {
 
 const pages: CommandItem[] = [
     { title: 'Dashboard', group: 'Plataforma', url: '/dashboard', icon: LayoutGrid },
+    { title: 'Productos', group: 'Ejemplos', url: '/admin/examples/products', icon: Package },
+    { title: 'Ventas', group: 'Ejemplos', url: '/admin/examples/sales', icon: ShoppingCart },
+    { title: 'Clientes', group: 'Ejemplos', url: '/admin/examples/customers', icon: Contact },
+    { title: 'Tareas', group: 'Ejemplos', url: '/admin/examples/tasks', icon: SquareKanban },
+    { title: 'Formulario', group: 'Ejemplos', url: '/admin/examples/form', icon: ClipboardList },
+    { title: 'Componentes', group: 'Ejemplos', url: '/admin/examples/components', icon: Shapes },
     { title: 'Usuarios', group: 'Administración', url: '/admin/users', icon: Users, permission: 'usuarios.ver' },
     { title: 'Roles y permisos', group: 'Administración', url: '/admin/roles', icon: ShieldCheck, permission: 'roles.ver' },
     { title: 'Mi perfil', group: 'Ajustes', url: '/settings/profile', icon: User },

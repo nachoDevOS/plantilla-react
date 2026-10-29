@@ -47,5 +47,16 @@ Route::middleware('auth')->group(function () {
         Route::get('roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit')->middleware('can:roles.editar');
         Route::put('roles/{role}', [RoleController::class, 'update'])->name('roles.update')->middleware('can:roles.editar');
         Route::delete('roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy')->middleware('can:roles.eliminar');
+
+        // Páginas de EJEMPLO con datos escritos a mano (components/admin/examples/data.ts).
+        // Muestran cómo se ve cada tipo de pantalla. Bórralas cuando ya no las necesites.
+        Route::prefix('examples')->name('examples.')->group(function () {
+            Route::get('products', fn () => Inertia::render('admin/examples/products'))->name('products');
+            Route::get('sales', fn () => Inertia::render('admin/examples/sales'))->name('sales');
+            Route::get('customers', fn () => Inertia::render('admin/examples/customers'))->name('customers');
+            Route::get('tasks', fn () => Inertia::render('admin/examples/tasks'))->name('tasks');
+            Route::get('form', fn () => Inertia::render('admin/examples/form'))->name('form');
+            Route::get('components', fn () => Inertia::render('admin/examples/components'))->name('components');
+        });
     });
 });

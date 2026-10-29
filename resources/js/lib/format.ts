@@ -34,3 +34,13 @@ export function relativeTime(date: string | null): string {
     }
     return 'Justo ahora';
 }
+
+/** Solo la fecha de un campo "Y-m-d" sin correrla por zona horaria: formatDay('2026-12-01') → "01 dic 2026". */
+export function formatDay(
+    date: string | null | undefined,
+    options: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short', year: 'numeric' },
+): string {
+    if (!date) return '—';
+    const [y, m, d] = date.slice(0, 10).split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('es', options);
+}

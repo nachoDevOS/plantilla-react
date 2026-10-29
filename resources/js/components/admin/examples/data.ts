@@ -1,8 +1,10 @@
 /*
- * DATOS DE EJEMPLO (escritos a mano) para las páginas de "Ejemplos" del menú.
- * Sirven para ver cómo queda cada pantalla antes de tener base de datos.
- * Cuando hagas el módulo real, estos datos los manda Laravel desde un controlador (props de Inertia)
- * y este archivo se puede borrar junto con pages/admin/examples/.
+ * DATOS Y TIPOS de las páginas de "Ejemplos" del menú.
+ *
+ * Productos, ventas y clientes vienen del SERVIDOR (app/Support/ExampleData.php → ExampleController),
+ * paginados y filtrados allá, igual que un módulo real. Aquí quedan sus tipos y los datos de los gráficos,
+ * del tablero de tareas y de la actividad, que no son listas paginadas.
+ * Cuando hagas tus módulos reales, este archivo se puede borrar junto con pages/admin/examples/.
  */
 
 /** Moneda de los ejemplos. */
@@ -24,7 +26,9 @@ export function moneyRound(value: number): string {
  ---------------------------------------------------------------------------------------------- */
 
 export type ProductStatus = 'active' | 'inactive';
+export type StockLevel = 'out' | 'low' | 'ok';
 
+/** Una fila de productos tal como la manda ExampleController::products(). */
 export interface ExampleProduct {
     id: number;
     code: string;
@@ -34,255 +38,24 @@ export interface ExampleProduct {
     price: number;
     cost: number;
     stock: number;
-    minStock: number;
+    min_stock: number;
     status: ProductStatus;
-    updatedAt: string;
+    updated_at: string;
+    level: StockLevel;
 }
 
-export const productCategories = ['Bebidas', 'Abarrotes', 'Limpieza', 'Lácteos', 'Panadería', 'Snacks'];
+export interface ProductFilters {
+    search?: string;
+    category?: string;
+    level?: string;
+    per_page?: string;
+}
 
-export const products: ExampleProduct[] = [
-    {
-        id: 1,
-        code: 'BEB-001',
-        name: 'Agua mineral 2 L',
-        category: 'Bebidas',
-        brand: 'Vital',
-        price: 8,
-        cost: 5.2,
-        stock: 140,
-        minStock: 40,
-        status: 'active',
-        updatedAt: '2026-10-28',
-    },
-    {
-        id: 2,
-        code: 'BEB-002',
-        name: 'Gaseosa cola 3 L',
-        category: 'Bebidas',
-        brand: 'Coca-Cola',
-        price: 16.5,
-        cost: 12,
-        stock: 62,
-        minStock: 30,
-        status: 'active',
-        updatedAt: '2026-10-27',
-    },
-    {
-        id: 3,
-        code: 'BEB-003',
-        name: 'Jugo de durazno 1 L',
-        category: 'Bebidas',
-        brand: 'Del Valle',
-        price: 11,
-        cost: 7.8,
-        stock: 18,
-        minStock: 25,
-        status: 'active',
-        updatedAt: '2026-10-25',
-    },
-    {
-        id: 4,
-        code: 'ABA-001',
-        name: 'Arroz grano de oro 5 kg',
-        category: 'Abarrotes',
-        brand: 'Caisy',
-        price: 45,
-        cost: 36,
-        stock: 35,
-        minStock: 15,
-        status: 'active',
-        updatedAt: '2026-10-28',
-    },
-    {
-        id: 5,
-        code: 'ABA-002',
-        name: 'Aceite vegetal 900 ml',
-        category: 'Abarrotes',
-        brand: 'Fino',
-        price: 14.5,
-        cost: 11.2,
-        stock: 0,
-        minStock: 20,
-        status: 'active',
-        updatedAt: '2026-10-20',
-    },
-    {
-        id: 6,
-        code: 'ABA-003',
-        name: 'Azúcar morena 1 kg',
-        category: 'Abarrotes',
-        brand: 'Guabirá',
-        price: 7.5,
-        cost: 5.9,
-        stock: 88,
-        minStock: 30,
-        status: 'active',
-        updatedAt: '2026-10-26',
-    },
-    {
-        id: 7,
-        code: 'ABA-004',
-        name: 'Fideo tallarín 400 g',
-        category: 'Abarrotes',
-        brand: 'Lazzaroni',
-        price: 6,
-        cost: 4.1,
-        stock: 120,
-        minStock: 40,
-        status: 'active',
-        updatedAt: '2026-10-22',
-    },
-    {
-        id: 8,
-        code: 'LIM-001',
-        name: 'Detergente en polvo 1 kg',
-        category: 'Limpieza',
-        brand: 'Omo',
-        price: 22,
-        cost: 16.5,
-        stock: 9,
-        minStock: 12,
-        status: 'active',
-        updatedAt: '2026-10-24',
-    },
-    {
-        id: 9,
-        code: 'LIM-002',
-        name: 'Lavandina 2 L',
-        category: 'Limpieza',
-        brand: 'Sapolio',
-        price: 9.5,
-        cost: 6.3,
-        stock: 46,
-        minStock: 15,
-        status: 'active',
-        updatedAt: '2026-10-19',
-    },
-    {
-        id: 10,
-        code: 'LIM-003',
-        name: 'Papel higiénico x4',
-        category: 'Limpieza',
-        brand: 'Scott',
-        price: 12,
-        cost: 8.4,
-        stock: 75,
-        minStock: 25,
-        status: 'inactive',
-        updatedAt: '2026-09-30',
-    },
-    {
-        id: 11,
-        code: 'LAC-001',
-        name: 'Leche entera 1 L',
-        category: 'Lácteos',
-        brand: 'PIL',
-        price: 7,
-        cost: 5.4,
-        stock: 54,
-        minStock: 40,
-        status: 'active',
-        updatedAt: '2026-10-29',
-    },
-    {
-        id: 12,
-        code: 'LAC-002',
-        name: 'Yogurt frutilla 1 L',
-        category: 'Lácteos',
-        brand: 'PIL',
-        price: 13,
-        cost: 9.6,
-        stock: 22,
-        minStock: 20,
-        status: 'active',
-        updatedAt: '2026-10-28',
-    },
-    {
-        id: 13,
-        code: 'LAC-003',
-        name: 'Queso menonita 500 g',
-        category: 'Lácteos',
-        brand: 'La Estancia',
-        price: 28,
-        cost: 21,
-        stock: 4,
-        minStock: 10,
-        status: 'active',
-        updatedAt: '2026-10-27',
-    },
-    {
-        id: 14,
-        code: 'PAN-001',
-        name: 'Pan molde integral',
-        category: 'Panadería',
-        brand: 'Bimbo',
-        price: 15,
-        cost: 10.8,
-        stock: 30,
-        minStock: 12,
-        status: 'active',
-        updatedAt: '2026-10-29',
-    },
-    {
-        id: 15,
-        code: 'PAN-002',
-        name: 'Galletas de agua 200 g',
-        category: 'Panadería',
-        brand: 'Mabel',
-        price: 4.5,
-        cost: 3,
-        stock: 160,
-        minStock: 50,
-        status: 'active',
-        updatedAt: '2026-10-23',
-    },
-    {
-        id: 16,
-        code: 'SNK-001',
-        name: 'Papas fritas 150 g',
-        category: 'Snacks',
-        brand: 'Pringles',
-        price: 18,
-        cost: 13.2,
-        stock: 40,
-        minStock: 20,
-        status: 'active',
-        updatedAt: '2026-10-21',
-    },
-    {
-        id: 17,
-        code: 'SNK-002',
-        name: 'Maní salado 100 g',
-        category: 'Snacks',
-        brand: 'Karinto',
-        price: 5,
-        cost: 3.2,
-        stock: 0,
-        minStock: 30,
-        status: 'inactive',
-        updatedAt: '2026-10-02',
-    },
-    {
-        id: 18,
-        code: 'SNK-003',
-        name: 'Chocolate con leche 80 g',
-        category: 'Snacks',
-        brand: 'Para Ti',
-        price: 9,
-        cost: 6.1,
-        stock: 68,
-        minStock: 25,
-        status: 'active',
-        updatedAt: '2026-10-26',
-    },
-];
-
-/** Estado del stock según la cantidad y el mínimo del producto. */
-export function stockLevel(product: ExampleProduct): 'out' | 'low' | 'ok' {
-    if (product.stock === 0) return 'out';
-    if (product.stock < product.minStock) return 'low';
-    return 'ok';
+export interface ProductStats {
+    total: number;
+    stock_value: number;
+    low: number;
+    out: number;
 }
 
 /* ----------------------------------------------------------------------------------------------
@@ -291,6 +64,7 @@ export function stockLevel(product: ExampleProduct): 'out' | 'low' | 'ok' {
 
 export type CustomerSegment = 'vip' | 'frecuente' | 'nuevo' | 'empresa';
 
+/** Una fila de clientes tal como la manda ExampleController::customers(). */
 export interface ExampleCustomer {
     id: number;
     name: string;
@@ -301,7 +75,13 @@ export interface ExampleCustomer {
     segment: CustomerSegment;
     orders: number;
     spent: number;
-    lastPurchase: string;
+    last_purchase: string;
+}
+
+export interface CustomerFilters {
+    search?: string;
+    segment?: string;
+    per_page?: string;
 }
 
 export const segmentLabels: Record<CustomerSegment, string> = {
@@ -310,117 +90,6 @@ export const segmentLabels: Record<CustomerSegment, string> = {
     nuevo: 'Nuevo',
     empresa: 'Empresa',
 };
-
-export const customers: ExampleCustomer[] = [
-    {
-        id: 1,
-        name: 'María Fernanda Rojas',
-        document: '6234512',
-        email: 'maria.rojas@correo.com',
-        phone: '71234567',
-        city: 'Trinidad',
-        segment: 'vip',
-        orders: 48,
-        spent: 9820.5,
-        lastPurchase: '2026-10-28',
-    },
-    {
-        id: 2,
-        name: 'Comercial El Puerto SRL',
-        document: '1023456021',
-        email: 'compras@elpuerto.bo',
-        phone: '33456789',
-        city: 'Santa Cruz',
-        segment: 'empresa',
-        orders: 31,
-        spent: 24150,
-        lastPurchase: '2026-10-27',
-    },
-    {
-        id: 3,
-        name: 'José Luis Vargas',
-        document: '5123987',
-        email: 'jlvargas@correo.com',
-        phone: '76543210',
-        city: 'Trinidad',
-        segment: 'frecuente',
-        orders: 22,
-        spent: 3410.75,
-        lastPurchase: '2026-10-26',
-    },
-    {
-        id: 4,
-        name: 'Ana Cecilia Montaño',
-        document: '7345120',
-        email: 'ana.montano@correo.com',
-        phone: '72109876',
-        city: 'Riberalta',
-        segment: 'nuevo',
-        orders: 2,
-        spent: 185,
-        lastPurchase: '2026-10-25',
-    },
-    {
-        id: 5,
-        name: 'Distribuidora Mamoré',
-        document: '2034567012',
-        email: 'ventas@mamore.bo',
-        phone: '34621100',
-        city: 'Guayaramerín',
-        segment: 'empresa',
-        orders: 19,
-        spent: 18760.4,
-        lastPurchase: '2026-10-22',
-    },
-    {
-        id: 6,
-        name: 'Carlos Eduardo Suárez',
-        document: '4987321',
-        email: 'csuarez@correo.com',
-        phone: '78812345',
-        city: 'La Paz',
-        segment: 'frecuente',
-        orders: 15,
-        spent: 2245.3,
-        lastPurchase: '2026-10-20',
-    },
-    {
-        id: 7,
-        name: 'Lucía Pereira Gómez',
-        document: '8123456',
-        email: 'lucia.pereira@correo.com',
-        phone: '69087654',
-        city: 'Cochabamba',
-        segment: 'vip',
-        orders: 39,
-        spent: 7650,
-        lastPurchase: '2026-10-29',
-    },
-    {
-        id: 8,
-        name: 'Roberto Antelo',
-        document: '3456789',
-        email: 'rantelo@correo.com',
-        phone: '77001122',
-        city: 'Trinidad',
-        segment: 'nuevo',
-        orders: 1,
-        spent: 64.5,
-        lastPurchase: '2026-10-18',
-    },
-    {
-        id: 9,
-        name: 'Patricia Melgar',
-        document: '6789012',
-        email: 'pmelgar@correo.com',
-        phone: '73334455',
-        city: 'San Borja',
-        segment: 'frecuente',
-        orders: 12,
-        spent: 1980,
-        lastPurchase: '2026-10-15',
-    },
-];
 
 /* ----------------------------------------------------------------------------------------------
  | VENTAS
@@ -444,119 +113,23 @@ export interface ExampleSale {
     method: PaymentMethod;
     status: SaleStatus;
     items: ExampleSaleItem[];
+    total: number;
 }
 
-export const sales: ExampleSale[] = [
-    {
-        id: 1,
-        number: 'V-00128',
-        customer: 'María Fernanda Rojas',
-        seller: 'Luis Rojas',
-        date: '2026-10-29T10:24:00',
-        method: 'QR',
-        status: 'paid',
-        items: [
-            { product: 'Leche entera 1 L', quantity: 6, price: 7 },
-            { product: 'Pan molde integral', quantity: 2, price: 15 },
-            { product: 'Yogurt frutilla 1 L', quantity: 1, price: 13 },
-        ],
-    },
-    {
-        id: 2,
-        number: 'V-00127',
-        customer: 'Comercial El Puerto SRL',
-        seller: 'Luis Rojas',
-        date: '2026-10-29T09:02:00',
-        method: 'Transferencia',
-        status: 'pending',
-        items: [
-            { product: 'Arroz grano de oro 5 kg', quantity: 10, price: 45 },
-            { product: 'Aceite vegetal 900 ml', quantity: 24, price: 14.5 },
-        ],
-    },
-    {
-        id: 3,
-        number: 'V-00126',
-        customer: 'Consumidor final',
-        seller: 'Carla Méndez',
-        date: '2026-10-28T18:45:00',
-        method: 'Efectivo',
-        status: 'paid',
-        items: [
-            { product: 'Gaseosa cola 3 L', quantity: 2, price: 16.5 },
-            { product: 'Papas fritas 150 g', quantity: 3, price: 18 },
-        ],
-    },
-    {
-        id: 4,
-        number: 'V-00125',
-        customer: 'José Luis Vargas',
-        seller: 'Carla Méndez',
-        date: '2026-10-28T16:10:00',
-        method: 'Tarjeta',
-        status: 'paid',
-        items: [
-            { product: 'Detergente en polvo 1 kg', quantity: 2, price: 22 },
-            { product: 'Lavandina 2 L', quantity: 2, price: 9.5 },
-        ],
-    },
-    {
-        id: 5,
-        number: 'V-00124',
-        customer: 'Lucía Pereira Gómez',
-        seller: 'Luis Rojas',
-        date: '2026-10-28T11:30:00',
-        method: 'QR',
-        status: 'cancelled',
-        items: [{ product: 'Queso menonita 500 g', quantity: 1, price: 28 }],
-    },
-    {
-        id: 6,
-        number: 'V-00123',
-        customer: 'Distribuidora Mamoré',
-        seller: 'Pedro Suárez',
-        date: '2026-10-27T15:05:00',
-        method: 'Transferencia',
-        status: 'paid',
-        items: [
-            { product: 'Agua mineral 2 L', quantity: 48, price: 8 },
-            { product: 'Galletas de agua 200 g', quantity: 60, price: 4.5 },
-        ],
-    },
-    {
-        id: 7,
-        number: 'V-00122',
-        customer: 'Consumidor final',
-        seller: 'Pedro Suárez',
-        date: '2026-10-27T12:40:00',
-        method: 'Efectivo',
-        status: 'paid',
-        items: [
-            { product: 'Chocolate con leche 80 g', quantity: 4, price: 9 },
-            { product: 'Jugo de durazno 1 L', quantity: 2, price: 11 },
-        ],
-    },
-    {
-        id: 8,
-        number: 'V-00121',
-        customer: 'Carlos Eduardo Suárez',
-        seller: 'Carla Méndez',
-        date: '2026-10-26T17:20:00',
-        method: 'Tarjeta',
-        status: 'pending',
-        items: [
-            { product: 'Fideo tallarín 400 g', quantity: 5, price: 6 },
-            { product: 'Azúcar morena 1 kg', quantity: 3, price: 7.5 },
-        ],
-    },
-];
+export interface SaleFilters {
+    search?: string;
+    status?: string;
+    per_page?: string;
+}
+
+export interface SaleStats {
+    today: number;
+    average: number;
+    paid_count: number;
+    pending: number;
+}
 
 export const saleStatusLabels: Record<SaleStatus, string> = { paid: 'Pagada', pending: 'Pendiente', cancelled: 'Anulada' };
-
-/** Total de una venta (suma de cantidad × precio). */
-export function saleTotal(sale: ExampleSale): number {
-    return sale.items.reduce((sum, item) => sum + item.quantity * item.price, 0);
-}
 
 /** Ventas de los últimos 14 días (para el gráfico de barras). */
 export const dailySales: { day: string; total: number }[] = [

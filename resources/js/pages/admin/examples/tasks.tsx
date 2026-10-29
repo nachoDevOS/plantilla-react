@@ -61,7 +61,7 @@ export default function ExampleTasks() {
                     }
                 />
 
-                <ExampleNotice />
+                <ExampleNotice source="components/admin/examples/data.ts" />
 
                 {/* Avance general */}
                 <div className="surface flex items-center gap-4 rounded-xl px-5 py-4">

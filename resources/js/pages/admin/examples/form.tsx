@@ -1,7 +1,6 @@
 import { PageHeader } from '@/components/admin/common/page-header';
 import { SimpleSelect } from '@/components/admin/common/simple-select';
 import { Panel, PanelHeader } from '@/components/admin/dashboard/panel';
-import { ExampleNotice } from '@/components/admin/examples/example-parts';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -120,8 +119,6 @@ export default function ExampleForm() {
                         </>
                     }
                 />
-
-                <ExampleNotice />
 
                 {saved && (
                     <div className="flex items-start gap-3 rounded-lg border border-emerald-300/70 bg-emerald-50 px-4 py-3 text-[13px] text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200">

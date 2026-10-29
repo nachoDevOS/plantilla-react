@@ -2,6 +2,7 @@ import { DataTable, EmptyRow, Td, Th } from '@/components/admin/common/data-tabl
 import { PageHeader } from '@/components/admin/common/page-header';
 import { ActionButton, RowActions } from '@/components/admin/common/row-actions';
 import { StatCard, StatGrid } from '@/components/admin/common/stat-card';
+import { TableToolbar } from '@/components/admin/common/table-toolbar';
 import { type BadgeTone, ToneBadge } from '@/components/admin/common/tone-badge';
 import { Panel, PanelHeader } from '@/components/admin/dashboard/panel';
 import {
@@ -11,26 +12,30 @@ import {
     money,
     moneyRound,
     paymentBreakdown,
-    sales,
+    type SaleFilters,
+    type SaleStats,
     type SaleStatus,
     saleStatusLabels,
-    saleTotal,
 } from '@/components/admin/examples/data';
 import { ExampleNotice } from '@/components/admin/examples/example-parts';
+import { Pagination } from '@/components/shared/pagination';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useFilters } from '@/hooks/use-filters';
 import AdminLayout from '@/layouts/admin/admin-layout';
 import { formatDate } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import { type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem, type Paginated } from '@/types';
 import { Head } from '@inertiajs/react';
 import { Activity, BarChart3, CalendarDays, CreditCard, Eye, Printer, Receipt, ShoppingCart, TrendingUp, Wallet } from 'lucide-react';
 import { useState } from 'react';
 
 /*
  * PÁGINA DE EJEMPLO: Ventas  (ruta /admin/examples/sales)
- * Indicadores, gráfico de barras hecho solo con CSS, métodos de pago, últimas ventas con filtro por estado,
- * detalle de cada venta en una ventana y línea de tiempo de actividad.
+ * Datos de la tabla: app/Http/Controllers/Admin/ExampleController.php → sales()
+ * Indicadores, gráfico de barras hecho solo con CSS, métodos de pago, últimas ventas con filtro por estado
+ * (PAGINACIÓN DEL LADO DEL SERVIDOR), detalle de cada venta en una ventana y línea de tiempo de actividad.
+ * El gráfico, los métodos de pago y la actividad salen de components/admin/examples/data.ts.
  */
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -49,16 +54,20 @@ const tabs: { id: SaleStatus | 'all'; label: string }[] = [
 
 const activityDot = { blue: 'bg-blue-500', green: 'bg-emerald-500', amber: 'bg-amber-500', red: 'bg-rose-500' } as const;
 
-export default function ExampleSales() {
-    const [tab, setTab] = useState<SaleStatus | 'all'>('all');
-    const [viewing, setViewing] = useState<ExampleSale | null>(null);
+interface Props {
+    sales: Paginated<ExampleSale>;
+    filters: SaleFilters;
+    /** Cuántas ventas hay en cada estado (para las pestañas) */
+    statusCounts: Record<SaleStatus, number>;
+    stats: SaleStats;
+}
 
-    const visible = sales.filter((sale) => tab === 'all' || sale.status === tab);
-    const paid = sales.filter((sale) => sale.status === 'paid');
-    const todayTotal = paid.filter((sale) => sale.date.startsWith('2026-10-29')).reduce((sum, sale) => sum + saleTotal(sale), 0);
+export default function ExampleSales({ sales, filters, statusCounts, stats }: Props) {
+    const [viewing, setViewing] = useState<ExampleSale | null>(null);
+    const applyFilters = useFilters('admin.examples.sales', filters);
+    const tab = (filters.status as SaleStatus | undefined) ?? 'all';
+    const allCount = Object.values(statusCounts).reduce((sum, n) => sum + n, 0);
     const periodTotal = dailySales.reduce((sum, d) => sum + d.total, 0);
-    const average = paid.length ? paid.reduce((sum, sale) => sum + saleTotal(sale), 0) / paid.length : 0;
-    const pendingTotal = sales.filter((sale) => sale.status === 'pending').reduce((sum, sale) => sum + saleTotal(sale), 0);
 
     return (
         <AdminLayout breadcrumbs={breadcrumbs}>
@@ -83,13 +92,19 @@ export default function ExampleSales() {
                 <ExampleNotice />
 
                 <StatGrid>
-                    <StatCard icon={Wallet} label="Vendido hoy" value={money(todayTotal)} hint="Solo ventas pagadas" tone="green" colorValue />
+                    <StatCard icon={Wallet} label="Vendido hoy" value={money(stats.today)} hint="Solo ventas pagadas" tone="green" colorValue />
                     <StatCard icon={TrendingUp} label="Últimos 14 días" value={moneyRound(periodTotal)} hint="+12 % que el periodo anterior" />
-                    <StatCard icon={Receipt} label="Ticket promedio" value={money(average)} hint={`${paid.length} ventas pagadas`} tone="violet" />
+                    <StatCard
+                        icon={Receipt}
+                        label="Ticket promedio"
+                        value={money(stats.average)}
+                        hint={`${stats.paid_count} ventas pagadas`}
+                        tone="violet"
+                    />
                     <StatCard
                         icon={CreditCard}
                         label="Por cobrar"
-                        value={moneyRound(pendingTotal)}
+                        value={moneyRound(stats.pending)}
                         hint="Ventas pendientes"
                         tone="amber"
                         colorValue
@@ -113,24 +128,34 @@ export default function ExampleSales() {
                         <PanelHeader
                             icon={Receipt}
                             title="Últimas ventas"
-                            description={`${visible.length} de ${sales.length} ventas`}
+                            description={`${sales.total} de ${allCount} ventas`}
                             aside={
                                 <div className="bg-muted flex rounded-lg p-0.5">
                                     {tabs.map((t) => (
                                         <button
                                             key={t.id}
                                             type="button"
-                                            onClick={() => setTab(t.id)}
+                                            onClick={() => applyFilters({ status: t.id })}
                                             className={cn(
                                                 'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
                                                 tab === t.id ? 'bg-card text-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground',
                                             )}
                                         >
                                             {t.label}
+                                            <span className="num text-muted-foreground ml-1 text-[11px]">
+                                                {t.id === 'all' ? allCount : statusCounts[t.id]}
+                                            </span>
                                         </button>
                                     ))}
                                 </div>
                             }
+                        />
+                        <TableToolbar
+                            perPage={Number(filters.per_page ?? 10)}
+                            onPerPageChange={(n) => applyFilters({ per_page: String(n) })}
+                            search={filters.search ?? ''}
+                            onSearch={(search) => applyFilters({ search })}
+                            searchPlaceholder="N°, cliente o vendedor…"
                         />
                         <DataTable
                             head={
@@ -144,7 +169,7 @@ export default function ExampleSales() {
                                 </>
                             }
                         >
-                            {visible.map((sale) => (
+                            {sales.data.map((sale) => (
                                 <tr key={sale.id}>
                                     <Td>
                                         <p className="num font-medium">{sale.number}</p>
@@ -166,7 +191,7 @@ export default function ExampleSales() {
                                         align="right"
                                         className={cn('font-semibold', sale.status === 'cancelled' && 'text-muted-foreground line-through')}
                                     >
-                                        {money(saleTotal(sale))}
+                                        {money(sale.total)}
                                     </Td>
                                     <Td>
                                         <RowActions>
@@ -175,8 +200,9 @@ export default function ExampleSales() {
                                     </Td>
                                 </tr>
                             ))}
-                            {visible.length === 0 && <EmptyRow colSpan={6} text="No hay ventas con ese estado." />}
+                            {sales.data.length === 0 && <EmptyRow colSpan={6} text="No hay ventas con esos filtros." />}
                         </DataTable>
+                        <Pagination paginator={sales} itemName="ventas" />
                     </Panel>
 
                     <Panel>
@@ -305,7 +331,7 @@ function SaleDetailDialog({ sale, onClose }: { sale: ExampleSale | null; onClose
                             </DataTable>
                             <div className="bg-muted/50 flex items-center justify-between border-t px-4 py-3">
                                 <span className="text-[13px] font-medium">Total</span>
-                                <span className="font-display num text-lg font-bold">{money(saleTotal(sale))}</span>
+                                <span className="font-display num text-lg font-bold">{money(sale.total)}</span>
                             </div>
                         </div>
 

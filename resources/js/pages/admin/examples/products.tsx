@@ -6,24 +6,32 @@ import { SimpleSelect } from '@/components/admin/common/simple-select';
 import { StatCard, StatGrid } from '@/components/admin/common/stat-card';
 import { ALL, TableToolbar } from '@/components/admin/common/table-toolbar';
 import { ToneBadge } from '@/components/admin/common/tone-badge';
-import { type ExampleProduct, products as initialProducts, money, moneyRound, productCategories, stockLevel } from '@/components/admin/examples/data';
-import { ExampleNotice, LocalPager } from '@/components/admin/examples/example-parts';
+import { type ExampleProduct, money, moneyRound, type ProductFilters, type ProductStats } from '@/components/admin/examples/data';
+import { ExampleNotice } from '@/components/admin/examples/example-parts';
+import InputError from '@/components/shared/input-error';
+import { Pagination } from '@/components/shared/pagination';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useFilters } from '@/hooks/use-filters';
 import AdminLayout from '@/layouts/admin/admin-layout';
 import { formatDay } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
-import { AlertTriangle, Boxes, Download, Eye, Package, PackageX, Pencil, Plus, Trash2, Wallet } from 'lucide-react';
-import { FormEventHandler, useMemo, useState } from 'react';
+import { type BreadcrumbItem, type Paginated } from '@/types';
+import { Head, router, useForm } from '@inertiajs/react';
+import { AlertTriangle, Boxes, Eye, LoaderCircle, Package, PackageX, Pencil, Plus, RotateCcw, Trash2, Wallet } from 'lucide-react';
+import { FormEventHandler, useEffect, useState } from 'react';
 
 /*
  * PÁGINA DE EJEMPLO: Productos  (ruta /admin/examples/products)
- * Catálogo con indicadores, buscador, filtro por categoría, paginación y acciones por fila (ver, editar, eliminar).
- * Todo funciona en el navegador con los datos de components/admin/examples/data.ts.
+ * Datos: app/Http/Controllers/Admin/ExampleController.php → products()
+ *
+ * Funciona como un módulo real:
+ *   - PAGINACIÓN DEL LADO DEL SERVIDOR: la tabla recibe solo la página pedida (?page=2&per_page=25).
+ *   - Buscador y filtros viajan en la URL; Laravel filtra y devuelve el resultado.
+ *   - Crear / editar / eliminar llaman a rutas de Laravel, que validan y responden con un mensaje.
+ *     (Los cambios se guardan en tu sesión, no en la base de datos: "Restaurar datos" los deshace.)
  */
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -37,42 +45,23 @@ const levelBadge = {
     ok: { tone: 'green', label: 'Disponible' },
 } as const;
 
-type FormState = Pick<ExampleProduct, 'code' | 'name' | 'category' | 'brand'> & { price: string; stock: string };
+interface Props {
+    products: Paginated<ExampleProduct>;
+    filters: ProductFilters;
+    categories: string[];
+    stats: ProductStats;
+}
 
-const emptyForm: FormState = { code: '', name: '', category: productCategories[0], brand: '', price: '', stock: '' };
-
-export default function ExampleProducts() {
-    const [items, setItems] = useState<ExampleProduct[]>(initialProducts);
-    const [search, setSearch] = useState('');
-    const [category, setCategory] = useState<string>(ALL);
-    const [level, setLevel] = useState<string>(ALL);
-    const [perPage, setPerPage] = useState(10);
-    const [page, setPage] = useState(1);
+export default function ExampleProducts({ products, filters, categories, stats }: Props) {
+    const applyFilters = useFilters('admin.examples.products', filters);
+    const categoryOptions = categories.map((c) => ({ id: c, name: c }));
 
     const [viewing, setViewing] = useState<ExampleProduct | null>(null);
     const [editing, setEditing] = useState<ExampleProduct | 'new' | null>(null);
     const [deleting, setDeleting] = useState<ExampleProduct | null>(null);
 
-    const filtered = useMemo(() => {
-        const term = search.toLowerCase();
-        return items.filter(
-            (p) =>
-                (category === ALL || p.category === category) &&
-                (level === ALL || stockLevel(p) === level) &&
-                (!term || `${p.name} ${p.code} ${p.brand}`.toLowerCase().includes(term)),
-        );
-    }, [items, search, category, level]);
-
-    const visible = filtered.slice((page - 1) * perPage, page * perPage);
-
-    const stockValue = items.reduce((sum, p) => sum + p.stock * p.cost, 0);
-    const lowCount = items.filter((p) => stockLevel(p) === 'low').length;
-    const outCount = items.filter((p) => stockLevel(p) === 'out').length;
-
-    const applyFilter = (change: () => void) => {
-        change();
-        setPage(1);
-    };
+    // Clic en una tarjeta de indicador: filtra por ese estado (otro clic lo quita)
+    const toggleLevel = (level: 'low' | 'out') => applyFilters({ level: filters.level === level ? ALL : level });
 
     return (
         <AdminLayout breadcrumbs={breadcrumbs}>
@@ -81,11 +70,11 @@ export default function ExampleProducts() {
                 <PageHeader
                     icon={Package}
                     title="Productos"
-                    description={`${items.length} productos en el catálogo · precios en Bs`}
+                    description={`${stats.total} productos en el catálogo · precios en Bs`}
                     actions={
                         <>
-                            <Button variant="outline">
-                                <Download /> Exportar
+                            <Button variant="outline" onClick={() => router.post(route('admin.examples.products.reset'))}>
+                                <RotateCcw /> Restaurar datos
                             </Button>
                             <Button className="btn-brand" onClick={() => setEditing('new')}>
                                 <Plus /> Nuevo producto
@@ -97,48 +86,48 @@ export default function ExampleProducts() {
                 <ExampleNotice />
 
                 <StatGrid>
-                    <StatCard icon={Boxes} label="Productos" value={items.length} hint={`${productCategories.length} categorías`} />
-                    <StatCard icon={Wallet} label="Valor del inventario" value={moneyRound(stockValue)} hint="Stock × costo" tone="green" />
+                    <StatCard icon={Boxes} label="Productos" value={stats.total} hint={`${categories.length} categorías`} />
+                    <StatCard icon={Wallet} label="Valor del inventario" value={moneyRound(stats.stock_value)} hint="Stock × costo" tone="green" />
                     <StatCard
                         icon={AlertTriangle}
                         label="Stock bajo"
-                        value={lowCount}
-                        hint="Por debajo del mínimo"
+                        value={stats.low}
+                        hint={filters.level === 'low' ? 'Filtrando · clic para quitar' : 'Clic para ver cuáles'}
                         tone="amber"
                         colorValue
-                        onClick={() => applyFilter(() => setLevel(level === 'low' ? ALL : 'low'))}
+                        onClick={() => toggleLevel('low')}
                     />
                     <StatCard
                         icon={PackageX}
                         label="Sin stock"
-                        value={outCount}
-                        hint="Reponer cuanto antes"
+                        value={stats.out}
+                        hint={filters.level === 'out' ? 'Filtrando · clic para quitar' : 'Clic para ver cuáles'}
                         tone="red"
                         colorValue
-                        onClick={() => applyFilter(() => setLevel(level === 'out' ? ALL : 'out'))}
+                        onClick={() => toggleLevel('out')}
                     />
                 </StatGrid>
 
                 <div className="surface overflow-hidden rounded-xl">
                     <TableToolbar
-                        perPage={perPage}
-                        onPerPageChange={(n) => applyFilter(() => setPerPage(n))}
-                        search={search}
-                        onSearch={(value) => applyFilter(() => setSearch(value))}
+                        perPage={Number(filters.per_page ?? 10)}
+                        onPerPageChange={(n) => applyFilters({ per_page: String(n) })}
+                        search={filters.search ?? ''}
+                        onSearch={(search) => applyFilters({ search })}
                         searchPlaceholder="Nombre, código o marca…"
                     >
                         <SimpleSelect
                             className="w-48"
-                            options={productCategories.map((c) => ({ id: c, name: c }))}
-                            value={category}
-                            onChange={(value) => applyFilter(() => setCategory(value))}
+                            options={categoryOptions}
+                            value={filters.category}
+                            onChange={(category) => applyFilters({ category })}
                             allLabel="Todas las categorías"
                         />
                         <SimpleSelect
                             className="w-40"
                             options={Object.entries(levelBadge).map(([id, { label }]) => ({ id, name: label }))}
-                            value={level}
-                            onChange={(value) => applyFilter(() => setLevel(value))}
+                            value={filters.level}
+                            onChange={(level) => applyFilters({ level })}
                             allLabel="Todo el stock"
                         />
                     </TableToolbar>
@@ -156,8 +145,8 @@ export default function ExampleProducts() {
                             </>
                         }
                     >
-                        {visible.map((product) => {
-                            const level = levelBadge[stockLevel(product)];
+                        {products.data.map((product) => {
+                            const level = levelBadge[product.level];
                             return (
                                 <tr key={product.id} className={cn(product.status === 'inactive' && 'opacity-60')}>
                                     <Td>
@@ -174,7 +163,7 @@ export default function ExampleProducts() {
                                     </Td>
                                     <Td align="right">
                                         {product.stock}
-                                        <span className="text-muted-foreground text-xs"> / mín. {product.minStock}</span>
+                                        <span className="text-muted-foreground text-xs"> / mín. {product.min_stock}</span>
                                     </Td>
                                     <Td>
                                         {product.status === 'inactive' ? (
@@ -185,7 +174,7 @@ export default function ExampleProducts() {
                                             </ToneBadge>
                                         )}
                                     </Td>
-                                    <Td className="text-muted-foreground hidden lg:table-cell">{formatDay(product.updatedAt)}</Td>
+                                    <Td className="text-muted-foreground hidden lg:table-cell">{formatDay(product.updated_at)}</Td>
                                     <Td>
                                         <RowActions>
                                             <ActionButton icon={Eye} label="Ver" tone="success" onClick={() => setViewing(product)} />
@@ -196,23 +185,15 @@ export default function ExampleProducts() {
                                 </tr>
                             );
                         })}
-                        {visible.length === 0 && <EmptyRow colSpan={7} text="No hay productos con esos filtros." />}
+                        {products.data.length === 0 && <EmptyRow colSpan={7} text="No hay productos con esos filtros." />}
                     </DataTable>
 
-                    <LocalPager page={page} perPage={perPage} total={filtered.length} onPageChange={setPage} itemName="productos" />
+                    <Pagination paginator={products} itemName="productos" />
                 </div>
             </div>
 
             <ProductDetailDialog product={viewing} onClose={() => setViewing(null)} />
-
-            <ProductFormDialog
-                product={editing}
-                onClose={() => setEditing(null)}
-                onSave={(saved) => {
-                    setItems((list) => (list.some((p) => p.id === saved.id) ? list.map((p) => (p.id === saved.id ? saved : p)) : [saved, ...list]));
-                    setEditing(null);
-                }}
-            />
+            <ProductFormDialog product={editing} categories={categoryOptions} onClose={() => setEditing(null)} />
 
             <ConfirmDialog
                 open={deleting !== null}
@@ -225,10 +206,9 @@ export default function ExampleProducts() {
                 }
                 confirmLabel="Eliminar"
                 destructive
-                onConfirm={(done) => {
-                    setItems((list) => list.filter((p) => p.id !== deleting?.id));
-                    done();
-                }}
+                onConfirm={(done) =>
+                    deleting && router.delete(route('admin.examples.products.destroy', deleting.id), { preserveScroll: true, onFinish: done })
+                }
             />
         </AdminLayout>
     );
@@ -254,8 +234,8 @@ function ProductDetailDialog({ product, onClose }: { product: ExampleProduct | n
                                 ['Costo', money(product.cost)],
                                 ['Margen', `${margin} %`],
                                 ['Stock actual', `${product.stock} unidades`],
-                                ['Stock mínimo', `${product.minStock} unidades`],
-                                ['Última actualización', formatDay(product.updatedAt)],
+                                ['Stock mínimo', `${product.min_stock} unidades`],
+                                ['Última actualización', formatDay(product.updated_at)],
                             ].map(([label, value]) => (
                                 <div key={label} className="bg-muted/50 rounded-lg px-3 py-2">
                                     <dt className="text-muted-foreground text-xs">{label}</dt>
@@ -277,52 +257,48 @@ function ProductDetailDialog({ product, onClose }: { product: ExampleProduct | n
 
 interface ProductFormDialogProps {
     product: ExampleProduct | 'new' | null;
+    categories: { id: string; name: string }[];
     onClose: () => void;
-    onSave: (product: ExampleProduct) => void;
 }
 
-function ProductFormDialog({ product, onClose, onSave }: ProductFormDialogProps) {
+/** Ventana de crear / editar. useForm envía a Laravel y muestra los errores de validación que devuelve. */
+function ProductFormDialog({ product, categories, onClose }: ProductFormDialogProps) {
     const isNew = product === 'new';
-    const [form, setForm] = useState<FormState>(emptyForm);
-    const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
-    const [openedFor, setOpenedFor] = useState<ExampleProduct | 'new' | null>(null);
+    const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm({
+        code: '',
+        name: '',
+        category: categories[0]?.id ?? '',
+        brand: '',
+        price: '',
+        stock: '',
+    });
 
     // Al abrir la ventana se cargan los datos del producto (o el formulario vacío si es nuevo)
-    if (product !== openedFor) {
-        setOpenedFor(product);
-        setErrors({});
-        setForm(
-            product && product !== 'new'
-                ? { ...product, price: String(product.price), stock: String(product.stock) }
-                : { ...emptyForm, code: `NUE-${String(Date.now()).slice(-3)}` },
-        );
-    }
-
-    const set = (key: keyof FormState, value: string) => setForm((f) => ({ ...f, [key]: value }));
+    useEffect(() => {
+        clearErrors();
+        if (product && product !== 'new') {
+            setData({
+                code: product.code,
+                name: product.name,
+                category: product.category,
+                brand: product.brand,
+                price: String(product.price),
+                stock: String(product.stock),
+            });
+        } else if (product === 'new') {
+            reset();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [product]);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        const found: typeof errors = {};
-        if (!form.name.trim()) found.name = 'El nombre es obligatorio.';
-        if (!(Number(form.price) > 0)) found.price = 'Ingresa un precio mayor a 0.';
-        if (form.stock === '' || Number(form.stock) < 0) found.stock = 'El stock no puede ser negativo.';
-        setErrors(found);
-        if (Object.keys(found).length > 0) return;
-
-        const base = product && product !== 'new' ? product : null;
-        onSave({
-            id: base?.id ?? Date.now(),
-            code: form.code,
-            name: form.name.trim(),
-            category: form.category,
-            brand: form.brand.trim() || 'Sin marca',
-            price: Number(form.price),
-            cost: base?.cost ?? Number(form.price) * 0.7,
-            stock: Number(form.stock),
-            minStock: base?.minStock ?? 10,
-            status: base?.status ?? 'active',
-            updatedAt: new Date().toISOString().slice(0, 10),
-        });
+        const options = { preserveScroll: true, onSuccess: () => onClose() };
+        if (product === 'new') {
+            post(route('admin.examples.products.store'), options);
+        } else if (product) {
+            put(route('admin.examples.products.update', product.id), options);
+        }
     };
 
     return (
@@ -331,32 +307,32 @@ function ProductFormDialog({ product, onClose, onSave }: ProductFormDialogProps)
                 <form onSubmit={submit} className="space-y-5">
                     <DialogHeader>
                         <DialogTitle>{isNew ? 'Nuevo producto' : 'Editar producto'}</DialogTitle>
-                        <DialogDescription>Los campos con * son obligatorios.</DialogDescription>
+                        <DialogDescription>Los campos con * son obligatorios. Laravel valida antes de guardar.</DialogDescription>
                     </DialogHeader>
 
                     <div className="grid gap-4 sm:grid-cols-2">
                         <Field label="Nombre *" error={errors.name} className="sm:col-span-2">
-                            <Input value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Ej: Leche entera 1 L" autoFocus />
+                            <Input value={data.name} onChange={(e) => setData('name', e.target.value)} placeholder="Ej: Leche entera 1 L" autoFocus />
                         </Field>
-                        <Field label="Código">
-                            <Input value={form.code} onChange={(e) => set('code', e.target.value)} />
+                        <Field label="Código *" error={errors.code}>
+                            <Input value={data.code} onChange={(e) => setData('code', e.target.value)} placeholder="Ej: LAC-010" />
                         </Field>
-                        <Field label="Marca">
-                            <Input value={form.brand} onChange={(e) => set('brand', e.target.value)} placeholder="Ej: PIL" />
+                        <Field label="Marca" error={errors.brand}>
+                            <Input value={data.brand} onChange={(e) => setData('brand', e.target.value)} placeholder="Ej: PIL" />
                         </Field>
-                        <Field label="Categoría">
+                        <Field label="Categoría *" error={errors.category}>
                             <SimpleSelect
                                 className="h-10"
-                                options={productCategories.map((c) => ({ id: c, name: c }))}
-                                value={form.category}
-                                onChange={(value) => set('category', value)}
+                                options={categories}
+                                value={data.category}
+                                onChange={(value) => setData('category', value)}
                             />
                         </Field>
                         <Field label="Precio (Bs) *" error={errors.price}>
-                            <Input type="number" step="0.01" min="0" value={form.price} onChange={(e) => set('price', e.target.value)} />
+                            <Input type="number" step="0.01" min="0" value={data.price} onChange={(e) => setData('price', e.target.value)} />
                         </Field>
                         <Field label="Stock *" error={errors.stock}>
-                            <Input type="number" min="0" value={form.stock} onChange={(e) => set('stock', e.target.value)} />
+                            <Input type="number" min="0" value={data.stock} onChange={(e) => setData('stock', e.target.value)} />
                         </Field>
                     </div>
 
@@ -364,7 +340,8 @@ function ProductFormDialog({ product, onClose, onSave }: ProductFormDialogProps)
                         <Button type="button" variant="outline" onClick={onClose}>
                             Cancelar
                         </Button>
-                        <Button type="submit" className="btn-brand">
+                        <Button type="submit" className="btn-brand" disabled={processing}>
+                            {processing && <LoaderCircle className="animate-spin" />}
                             {isNew ? 'Crear producto' : 'Guardar cambios'}
                         </Button>
                     </DialogFooter>
@@ -379,7 +356,7 @@ function Field({ label, error, className, children }: { label: string; error?: s
         <div className={cn('grid content-start gap-1.5', className)}>
             <Label>{label}</Label>
             {children}
-            {error && <p className="text-destructive text-xs">{error}</p>}
+            <InputError message={error} />
         </div>
     );
 }

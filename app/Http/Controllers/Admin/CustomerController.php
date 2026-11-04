@@ -36,6 +36,8 @@ class CustomerController extends Controller
             'filters' => $filters,
             'issuedIn' => Customer::ISSUED_IN,
             'genders' => Customer::GENDERS,
+            // Key de Google Maps (GOOGLE_MAPS_API_KEY). Es para el navegador: se protege restringiéndola por dominio en Google Cloud
+            'googleMapsKey' => config('services.google_maps.key'),
             'phoneCountries' => collect(Customer::PHONE_COUNTRIES)->map(fn (array $country, string $dial) => [...$country, 'dial' => $dial])->values(),
         ]);
     }

@@ -49,9 +49,10 @@ interface Props {
     issuedIn: Labels;
     genders: Labels;
     phoneCountries: PhoneCountry[];
+    googleMapsKey: string | null;
 }
 
-export default function CustomersIndex({ customers, filters, issuedIn, genders, phoneCountries }: Props) {
+export default function CustomersIndex({ customers, filters, issuedIn, genders, phoneCountries, googleMapsKey }: Props) {
     const can = useCan();
     const imageUrl = useStorageUrl();
     const applyFilters = useFilters('admin.customers.index', filters);
@@ -227,6 +228,7 @@ export default function CustomersIndex({ customers, filters, issuedIn, genders, 
                 issuedIn={issuedIn}
                 genders={genders}
                 phoneCountries={phoneCountries}
+                googleMapsKey={googleMapsKey}
             />
 
             <CustomerDetailDialog
@@ -234,6 +236,7 @@ export default function CustomersIndex({ customers, filters, issuedIn, genders, 
                 issuedIn={issuedIn}
                 genders={genders}
                 phoneCountries={phoneCountries}
+                googleMapsKey={googleMapsKey}
                 onClose={() => setViewing(null)}
                 onEdit={can('clientes.editar') ? openEdit : undefined}
             />

@@ -7,6 +7,7 @@ import { PhoneText, type PhoneCountry } from '@/components/admin/common/phone-in
 import { ageFrom } from '@/components/admin/customers/customer-avatar';
 import { formatDate, formatPublicCode } from '@/lib/format';
 import { type Customer, type Labels } from '@/types/admin/customers';
+import { MapPin } from 'lucide-react';
 
 interface CustomerRowDetailProps {
     customer: Customer;
@@ -51,6 +52,23 @@ export function CustomerRowDetail({ customer, issuedIn, genders, phoneCountries 
                 <div className="col-span-2">
                     <Detail label="Dirección">
                         <span className="break-words">{customer.address || '—'}</span>
+                    </Detail>
+                </div>
+                <div className="col-span-2">
+                    <Detail label="Ubicación">
+                        {customer.latitude && customer.longitude ? (
+                            <a
+                                href={`https://www.google.com/maps/search/?api=1&query=${customer.latitude},${customer.longitude}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-primary num inline-flex items-center gap-1.5 hover:underline"
+                            >
+                                <MapPin className="size-3.5" />
+                                {customer.latitude}, {customer.longitude}
+                            </a>
+                        ) : (
+                            '—'
+                        )}
                     </Detail>
                 </div>
             </Block>

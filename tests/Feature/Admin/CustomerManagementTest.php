@@ -139,6 +139,35 @@ class CustomerManagementTest extends TestCase
         $this->assertSame($code, $customer->fresh()->code);
     }
 
+    public function test_the_location_is_saved_with_both_coordinates()
+    {
+        $this->actingAs($this->admin())->post('/admin/customers', $this->validData(['latitude' => '-14.8333123', 'longitude' => '-64.9012345']))
+            ->assertSessionHasNoErrors();
+
+        $customer = Customer::sole();
+        $this->assertEquals(-14.8333123, $customer->latitude);
+        $this->assertEquals(-64.9012345, $customer->longitude);
+    }
+
+    public function test_the_location_needs_both_coordinates_in_range()
+    {
+        $admin = $this->admin();
+
+        $this->actingAs($admin)->post('/admin/customers', $this->validData(['latitude' => '-14.83']))->assertSessionHasErrors('longitude');
+        $this->actingAs($admin)->post('/admin/customers', $this->validData(['longitude' => '-64.9']))->assertSessionHasErrors('latitude');
+        $this->actingAs($admin)->post('/admin/customers', $this->validData(['latitude' => '91', 'longitude' => '181']))->assertSessionHasErrors(['latitude', 'longitude']);
+
+        $this->assertSame(0, Customer::count());
+    }
+
+    public function test_the_page_receives_the_google_maps_key_from_the_configuration()
+    {
+        config(['services.google_maps.key' => 'clave-de-prueba']);
+
+        $this->actingAs($this->admin())->get('/admin/customers')
+            ->assertInertia(fn (Assert $page) => $page->where('googleMapsKey', 'clave-de-prueba'));
+    }
+
     public function test_only_the_required_fields_are_needed()
     {
         $this->actingAs($this->admin())->post('/admin/customers', [

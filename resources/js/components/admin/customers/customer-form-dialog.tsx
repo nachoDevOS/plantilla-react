@@ -2,6 +2,7 @@
  * Pieza de Clientes (se usa en pages/admin/customers/index.tsx).
  * A la izquierda la foto y un carnet que se arma en vivo mientras se escribe; a la derecha los datos.
  */
+import { LocationPicker } from '@/components/admin/common/location-picker';
 import { PhoneInput, type PhoneCountry } from '@/components/admin/common/phone-input';
 import { SimpleSelect } from '@/components/admin/common/simple-select';
 import { ageFrom } from '@/components/admin/customers/customer-avatar';
@@ -36,6 +37,8 @@ const emptyForm: CustomerForm = {
     phone: '',
     email: '',
     address: '',
+    latitude: '',
+    longitude: '',
     notes: '',
     is_active: true,
     photo: null,
@@ -50,9 +53,10 @@ interface CustomerFormDialogProps {
     issuedIn: Labels;
     genders: Labels;
     phoneCountries: PhoneCountry[];
+    googleMapsKey: string | null;
 }
 
-export function CustomerFormDialog({ open, onClose, customer, issuedIn, genders, phoneCountries }: CustomerFormDialogProps) {
+export function CustomerFormDialog({ open, onClose, customer, issuedIn, genders, phoneCountries, googleMapsKey }: CustomerFormDialogProps) {
     const isEdit = customer !== null;
     const imageUrl = useStorageUrl();
     const { data, setData, post, processing, errors, reset, clearErrors, transform } = useForm<CustomerForm>(emptyForm);
@@ -80,6 +84,8 @@ export function CustomerFormDialog({ open, onClose, customer, issuedIn, genders,
             phone: customer?.phone ?? '',
             email: customer?.email ?? '',
             address: customer?.address ?? '',
+            latitude: customer?.latitude ?? '',
+            longitude: customer?.longitude ?? '',
             notes: customer?.notes ?? '',
             is_active: customer?.is_active ?? true,
         });
@@ -119,7 +125,9 @@ export function CustomerFormDialog({ open, onClose, customer, issuedIn, genders,
             <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-4xl">
                 <DialogHeader>
                     <DialogTitle>{isEdit ? 'Editar cliente' : 'Nuevo cliente'}</DialogTitle>
-                    <DialogDescription>Los campos con * son obligatorios.</DialogDescription>
+                    <DialogDescription>
+                        Los campos con <RequiredMark /> son obligatorios.
+                    </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={submit} className="grid gap-6">
@@ -151,7 +159,7 @@ export function CustomerFormDialog({ open, onClose, customer, issuedIn, genders,
                         <div className="grid content-start gap-6">
                             <Section title="Nombres y apellidos">
                                 <div className="grid gap-4 sm:grid-cols-2">
-                                    <Field label="Primer nombre *" htmlFor="first_name" error={errors.first_name}>
+                                    <Field label="Primer nombre" required htmlFor="first_name" error={errors.first_name}>
                                         <Input {...text('first_name')} autoFocus autoComplete="off" />
                                     </Field>
                                     <Field label="Segundo nombre" htmlFor="second_name" error={errors.second_name}>
@@ -159,7 +167,7 @@ export function CustomerFormDialog({ open, onClose, customer, issuedIn, genders,
                                     </Field>
                                 </div>
                                 <div className="grid gap-4 sm:grid-cols-3">
-                                    <Field label="Primer apellido *" htmlFor="first_last_name" error={errors.first_last_name}>
+                                    <Field label="Primer apellido" required htmlFor="first_last_name" error={errors.first_last_name}>
                                         <Input {...text('first_last_name')} autoComplete="off" />
                                     </Field>
                                     <Field label="Segundo apellido" htmlFor="second_last_name" error={errors.second_last_name}>
@@ -173,13 +181,13 @@ export function CustomerFormDialog({ open, onClose, customer, issuedIn, genders,
 
                             <Section title="Documento de identidad">
                                 <div className="grid gap-4 sm:grid-cols-[1fr_110px_1fr]">
-                                    <Field label="CI *" htmlFor="ci" error={errors.ci}>
+                                    <Field label="CI" required htmlFor="ci" error={errors.ci}>
                                         <Input {...text('ci')} inputMode="numeric" placeholder="1234567" autoComplete="off" />
                                     </Field>
                                     <Field label="Extensión" htmlFor="ci_extension" error={errors.ci_extension}>
                                         <Input {...text('ci_extension')} placeholder="1A" maxLength={5} autoComplete="off" />
                                     </Field>
-                                    <Field label="Expedido *" htmlFor="ci_issued_in" error={errors.ci_issued_in}>
+                                    <Field label="Expedido" required htmlFor="ci_issued_in" error={errors.ci_issued_in}>
                                         <SimpleSelect
                                             id="ci_issued_in"
                                             className="h-10"
@@ -227,6 +235,14 @@ export function CustomerFormDialog({ open, onClose, customer, issuedIn, genders,
                                 <Field label="Dirección" htmlFor="address" error={errors.address}>
                                     <Input {...text('address')} autoComplete="off" />
                                 </Field>
+                                <LocationPicker
+                                    apiKey={googleMapsKey}
+                                    latitude={data.latitude}
+                                    longitude={data.longitude}
+                                    onChange={(latitude, longitude) => setData({ ...data, latitude, longitude })}
+                                    latitudeError={errors.latitude}
+                                    longitudeError={errors.longitude}
+                                />
                                 <Field label="Observaciones" htmlFor="notes" error={errors.notes}>
                                     <textarea
                                         id="notes"
@@ -268,10 +284,29 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     );
 }
 
-function Field({ label, htmlFor, error, children }: { label: string; htmlFor: string; error?: string; children: React.ReactNode }) {
+/** Asterisco rojo de los campos obligatorios. */
+function RequiredMark() {
+    return (
+        <span aria-hidden="true" className="font-semibold text-red-600 dark:text-red-400">
+            *
+        </span>
+    );
+}
+
+interface FieldProps {
+    label: string;
+    htmlFor: string;
+    required?: boolean;
+    error?: string;
+    children: React.ReactNode;
+}
+
+function Field({ label, htmlFor, required, error, children }: FieldProps) {
     return (
         <div className="grid content-start gap-2">
-            <Label htmlFor={htmlFor}>{label}</Label>
+            <Label htmlFor={htmlFor}>
+                {label} {required && <RequiredMark />}
+            </Label>
             {children}
             <InputError message={error} />
         </div>

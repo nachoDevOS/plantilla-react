@@ -63,7 +63,7 @@ class Customer extends Model
      */
     protected $fillable = [
         'photo', 'first_name', 'second_name', 'first_last_name', 'second_last_name', 'married_last_name',
-        'ci', 'ci_extension', 'ci_issued_in', 'birth_date', 'gender', 'phone_country_code', 'phone', 'email', 'address', 'notes', 'is_active',
+        'ci', 'ci_extension', 'ci_issued_in', 'birth_date', 'gender', 'phone_country_code', 'phone', 'email', 'address', 'latitude', 'longitude', 'notes', 'is_active',
     ];
 
     /**

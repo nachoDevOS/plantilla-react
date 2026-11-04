@@ -30,6 +30,8 @@ export interface Customer {
     phone: string | null;
     email: string | null;
     address: string | null;
+    latitude: string | null;
+    longitude: string | null;
     notes: string | null;
     is_active: boolean;
     created_at: string;
@@ -62,6 +64,8 @@ export type CustomerForm = {
     phone: string;
     email: string;
     address: string;
+    latitude: string;
+    longitude: string;
     notes: string;
     is_active: boolean;
     /** Archivo nuevo elegido (o tomado con la cámara). null = no cambiar */

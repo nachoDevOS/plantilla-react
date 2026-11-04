@@ -60,6 +60,9 @@ class CustomerRequest extends FormRequest
             'phone' => ['nullable', 'string', 'regex:/^[0-9]{6,15}$/'],
             'email' => ['nullable', 'string', 'email', 'max:255'],
             'address' => ['nullable', 'string', 'max:255'],
+            // Ubicación: las dos coordenadas juntas o ninguna
+            'latitude' => ['nullable', 'required_with:longitude', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'required_with:latitude', 'numeric', 'between:-180,180'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'is_active' => ['boolean'],
             // Foto (la guarda StorageController como .avif), máximo 3 MB. remove_photo = quitar la que tiene
@@ -102,6 +105,8 @@ class CustomerRequest extends FormRequest
             'phone' => 'teléfono',
             'email' => 'correo',
             'address' => 'dirección',
+            'latitude' => 'latitud',
+            'longitude' => 'longitud',
             'notes' => 'observaciones',
             'photo' => 'foto',
         ];

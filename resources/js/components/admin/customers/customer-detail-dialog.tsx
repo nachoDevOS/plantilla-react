@@ -2,6 +2,8 @@
  * Pieza de Clientes (se usa en pages/admin/customers/index.tsx): ventana del botón "Ver", con la foto grande
  * y los mismos datos del desplegable de la fila (CustomerRowDetail).
  */
+import { GoogleMap } from '@/components/admin/common/google-map';
+import { toMapPosition } from '@/components/admin/common/location-picker';
 import { type PhoneCountry } from '@/components/admin/common/phone-input';
 import { StatusBadge, UserAvatar } from '@/components/admin/common/user-badges';
 import { CustomerRowDetail } from '@/components/admin/customers/customer-row-detail';
@@ -16,14 +18,16 @@ interface CustomerDetailDialogProps {
     issuedIn: Labels;
     genders: Labels;
     phoneCountries: PhoneCountry[];
+    googleMapsKey: string | null;
     onClose: () => void;
     /** Sin esto (sin permiso) no aparece el botón Editar */
     onEdit?: (customer: Customer) => void;
 }
 
-export function CustomerDetailDialog({ customer, issuedIn, genders, phoneCountries, onClose, onEdit }: CustomerDetailDialogProps) {
+export function CustomerDetailDialog({ customer, issuedIn, genders, phoneCountries, googleMapsKey, onClose, onEdit }: CustomerDetailDialogProps) {
     const imageUrl = useStorageUrl();
     const photoUrl = imageUrl(customer?.photo);
+    const position = toMapPosition(customer?.latitude ?? null, customer?.longitude ?? null);
 
     return (
         <Dialog open={customer !== null} onOpenChange={(value) => !value && onClose()}>
@@ -58,6 +62,8 @@ export function CustomerDetailDialog({ customer, issuedIn, genders, phoneCountri
                         </DialogHeader>
 
                         <CustomerRowDetail customer={customer} issuedIn={issuedIn} genders={genders} phoneCountries={phoneCountries} />
+
+                        {googleMapsKey && position && <GoogleMap apiKey={googleMapsKey} position={position} className="h-64 w-full" />}
 
                         <DialogFooter>
                             <Button variant="outline" onClick={onClose}>

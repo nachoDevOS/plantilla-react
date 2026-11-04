@@ -151,35 +151,6 @@ class ExampleController extends Controller
     }
 
     /**
-     * GET /admin/examples/customers — Lista de clientes con buscador, filtro por segmento y paginación.
-     */
-    public function customers(Request $request): Response
-    {
-        $filters = $request->only(['search', 'segment', 'per_page']);
-        $all = collect(ExampleData::customers());
-        $search = mb_strtolower(trim((string) ($filters['search'] ?? '')));
-
-        $filtered = $all
-            ->when($filters['segment'] ?? null, fn (Collection $items, string $segment) => $items->where('segment', $segment))
-            ->when($search !== '', fn (Collection $items) => $items->filter(
-                fn (array $customer) => str_contains(mb_strtolower("{$customer['name']} {$customer['document']} {$customer['email']} {$customer['city']}"), $search)
-            ))
-            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
-            ->values();
-
-        return Inertia::render('admin/examples/customers', [
-            'customers' => $this->paginateCollection($filtered, $request),
-            'filters' => $filters,
-            'segments' => collect(ExampleData::CUSTOMER_SEGMENTS)->map(fn (string $label, string $segment) => [
-                'id' => $segment,
-                'name' => $label,
-                'count' => $all->where('segment', $segment)->count(),
-            ])->values(),
-            'total' => $all->count(),
-        ]);
-    }
-
-    /**
      * Productos de la sesión (o los originales si nunca se editaron).
      *
      * @return list<array<string, mixed>>

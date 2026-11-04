@@ -25,6 +25,12 @@ const mainNavItems: NavItem[] = [
 // Grupo "Administración": cada opción pide su permiso
 const adminNavItems: NavItem[] = [
     {
+        title: 'Clientes',
+        url: '/admin/customers',
+        icon: Contact,
+        permission: 'clientes.ver',
+    },
+    {
         title: 'Usuarios',
         url: '/admin/users',
         icon: Users,
@@ -43,7 +49,6 @@ const adminNavItems: NavItem[] = [
 const exampleNavItems: NavItem[] = [
     { title: 'Productos', url: '/admin/examples/products', icon: Package },
     { title: 'Ventas', url: '/admin/examples/sales', icon: ShoppingCart },
-    { title: 'Clientes', url: '/admin/examples/customers', icon: Contact },
     { title: 'Tareas', url: '/admin/examples/tasks', icon: SquareKanban },
     { title: 'Formulario', url: '/admin/examples/form', icon: ClipboardList },
     { title: 'Componentes', url: '/admin/examples/components', icon: Shapes },

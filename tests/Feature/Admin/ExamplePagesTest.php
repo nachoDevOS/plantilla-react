@@ -25,7 +25,6 @@ class ExamplePagesTest extends TestCase
         return [
             'productos' => ['products'],
             'ventas' => ['sales'],
-            'clientes' => ['customers'],
             'tareas' => ['tasks'],
             'formulario' => ['form'],
             'componentes' => ['components'],
@@ -61,9 +60,6 @@ class ExamplePagesTest extends TestCase
 
         $this->get('/admin/examples/sales?per_page=10')
             ->assertInertia(fn (Assert $page) => $page->has('sales.data', 10)->where('sales.total', count(ExampleData::sales())));
-
-        $this->get('/admin/examples/customers?per_page=15')
-            ->assertInertia(fn (Assert $page) => $page->has('customers.data', 15)->where('customers.last_page', 2));
     }
 
     public function test_example_lists_are_filtered_on_the_server()
@@ -81,9 +77,6 @@ class ExamplePagesTest extends TestCase
 
         $this->get('/admin/examples/sales?status=pending')
             ->assertInertia(fn (Assert $page) => $page->where('sales.total', 3)->where('statusCounts.pending', 3));
-
-        $this->get('/admin/examples/customers?segment=empresa')
-            ->assertInertia(fn (Assert $page) => $page->where('customers.total', 4));
     }
 
     public function test_example_products_can_be_created_edited_deleted_and_restored()

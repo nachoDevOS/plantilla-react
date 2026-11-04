@@ -42,6 +42,11 @@ return [
             'description' => 'Qué puede hacer cada rol.',
             'actions' => ['ver', 'crear', 'editar', 'eliminar'],
         ],
+        'clientes' => [
+            'label' => 'Clientes',
+            'description' => 'Registro de clientes con sus datos personales, CI y foto.',
+            'actions' => ['ver', 'crear', 'editar', 'eliminar'],
+        ],
     ],
 
     // Roles que se crean la primera vez (php artisan permissions:sync). Después se editan desde el panel.

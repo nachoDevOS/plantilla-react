@@ -41,6 +41,8 @@ export interface SharedData {
     quote: { message: string; author: string };
     auth: Auth;
     flash: Flash;
+    /** Dirección pública del bucket S3 (AWS_URL): las imágenes son aws_url/ruta. Ver lib/storage.ts */
+    aws_url?: string | null;
     [key: string]: unknown;
 }
 

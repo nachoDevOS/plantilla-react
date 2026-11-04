@@ -59,39 +59,6 @@ export interface ProductStats {
 }
 
 /* ----------------------------------------------------------------------------------------------
- | CLIENTES
- ---------------------------------------------------------------------------------------------- */
-
-export type CustomerSegment = 'vip' | 'frecuente' | 'nuevo' | 'empresa';
-
-/** Una fila de clientes tal como la manda ExampleController::customers(). */
-export interface ExampleCustomer {
-    id: number;
-    name: string;
-    document: string;
-    email: string;
-    phone: string;
-    city: string;
-    segment: CustomerSegment;
-    orders: number;
-    spent: number;
-    last_purchase: string;
-}
-
-export interface CustomerFilters {
-    search?: string;
-    segment?: string;
-    per_page?: string;
-}
-
-export const segmentLabels: Record<CustomerSegment, string> = {
-    vip: 'VIP',
-    frecuente: 'Frecuente',
-    nuevo: 'Nuevo',
-    empresa: 'Empresa',
-};
-
-/* ----------------------------------------------------------------------------------------------
  | VENTAS
  ---------------------------------------------------------------------------------------------- */
 

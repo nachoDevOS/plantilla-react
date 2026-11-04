@@ -44,3 +44,8 @@ export function formatDay(
     const [y, m, d] = date.slice(0, 10).split('-').map(Number);
     return new Date(y, m - 1, d).toLocaleDateString('es', options);
 }
+
+/** Código público para leerlo mejor, en grupos de 4: DRJA-G95Q-DSJX-EQP7. En la URL y en la base va sin guiones. */
+export function formatPublicCode(code: string): string {
+    return code.match(/.{1,4}/g)?.join('-') ?? code;
+}

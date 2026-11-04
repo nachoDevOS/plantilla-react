@@ -15,9 +15,6 @@ class ExampleData
     public const PRODUCT_CATEGORIES = ['Bebidas', 'Abarrotes', 'Limpieza', 'Lácteos', 'Panadería', 'Snacks'];
 
     /** @var array<string, string> */
-    public const CUSTOMER_SEGMENTS = ['vip' => 'VIP', 'frecuente' => 'Frecuente', 'nuevo' => 'Nuevo', 'empresa' => 'Empresa'];
-
-    /** @var array<string, string> */
     public const SALE_STATUSES = ['paid' => 'Pagada', 'pending' => 'Pendiente', 'cancelled' => 'Anulada'];
 
     /**
@@ -64,44 +61,6 @@ class ExampleData
             'min_stock' => $row[7],
             'status' => $row[8],
             'updated_at' => $row[9],
-        ], $rows, array_keys($rows));
-    }
-
-    /**
-     * @return list<array{id: int, name: string, document: string, email: string, phone: string, city: string, segment: string, orders: int, spent: float, last_purchase: string}>
-     */
-    public static function customers(): array
-    {
-        $rows = [
-            ['María Fernanda Rojas', '6234512', 'maria.rojas@correo.com', '71234567', 'Trinidad', 'vip', 48, 9820.5, '2026-10-28'],
-            ['Comercial El Puerto SRL', '1023456021', 'compras@elpuerto.bo', '33456789', 'Santa Cruz', 'empresa', 31, 24150, '2026-10-27'],
-            ['José Luis Vargas', '5123987', 'jlvargas@correo.com', '76543210', 'Trinidad', 'frecuente', 22, 3410.75, '2026-10-26'],
-            ['Ana Cecilia Montaño', '7345120', 'ana.montano@correo.com', '72109876', 'Riberalta', 'nuevo', 2, 185, '2026-10-25'],
-            ['Distribuidora Mamoré', '2034567012', 'ventas@mamore.bo', '34621100', 'Guayaramerín', 'empresa', 19, 18760.4, '2026-10-22'],
-            ['Carlos Eduardo Suárez', '4987321', 'csuarez@correo.com', '78812345', 'La Paz', 'frecuente', 15, 2245.3, '2026-10-20'],
-            ['Lucía Pereira Gómez', '8123456', 'lucia.pereira@correo.com', '69087654', 'Cochabamba', 'vip', 39, 7650, '2026-10-29'],
-            ['Roberto Antelo', '3456789', 'rantelo@correo.com', '77001122', 'Trinidad', 'nuevo', 1, 64.5, '2026-10-18'],
-            ['Patricia Melgar', '6789012', 'pmelgar@correo.com', '73334455', 'San Borja', 'frecuente', 12, 1980, '2026-10-15'],
-            ['Hotel Mamoré Palace', '3021456019', 'compras@mamorepalace.bo', '34627788', 'Trinidad', 'empresa', 27, 15320, '2026-10-28'],
-            ['Daniela Justiniano', '7012345', 'djustiniano@correo.com', '70112233', 'Santa Cruz', 'vip', 33, 6890.25, '2026-10-27'],
-            ['Fernando Egüez', '5567890', 'feguez@correo.com', '75567788', 'Trinidad', 'frecuente', 9, 1210, '2026-10-24'],
-            ['Gabriela Parada', '6678901', 'gparada@correo.com', '71998877', 'Riberalta', 'nuevo', 3, 240.5, '2026-10-23'],
-            ['Restaurante El Tropero', '4012345017', 'pedidos@eltropero.bo', '34629900', 'Trinidad', 'empresa', 22, 11450, '2026-10-26'],
-            ['Miguel Ángel Cuéllar', '4456123', 'macuellar@correo.com', '76665544', 'San Ignacio', 'frecuente', 14, 1875.6, '2026-10-21'],
-            ['Valeria Rivero', '8234567', 'vrivero@correo.com', '69912345', 'Trinidad', 'nuevo', 1, 98, '2026-10-29'],
-        ];
-
-        return array_map(fn (array $row, int $i) => [
-            'id' => $i + 1,
-            'name' => $row[0],
-            'document' => $row[1],
-            'email' => $row[2],
-            'phone' => $row[3],
-            'city' => $row[4],
-            'segment' => $row[5],
-            'orders' => $row[6],
-            'spent' => (float) $row[7],
-            'last_purchase' => $row[8],
         ], $rows, array_keys($rows));
     }
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ExampleController;
 use App\Http\Controllers\Admin\RoleController;
@@ -49,8 +50,14 @@ Route::middleware('auth')->group(function () {
         Route::put('roles/{role}', [RoleController::class, 'update'])->name('roles.update')->middleware('can:roles.editar');
         Route::delete('roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy')->middleware('can:roles.eliminar');
 
+        // Clientes: registro con datos personales, CI y foto
+        Route::get('customers', [CustomerController::class, 'index'])->name('customers.index')->middleware('can:clientes.ver');
+        Route::post('customers', [CustomerController::class, 'store'])->name('customers.store')->middleware('can:clientes.crear');
+        Route::put('customers/{customer}', [CustomerController::class, 'update'])->name('customers.update')->middleware('can:clientes.editar');
+        Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy')->middleware('can:clientes.eliminar');
+
         // Páginas de EJEMPLO con datos escritos a mano (app/Support/ExampleData.php).
-        // Productos, ventas y clientes se filtran y paginan EN EL SERVIDOR igual que un módulo real.
+        // Productos y ventas se filtran y paginan EN EL SERVIDOR igual que un módulo real.
         // Bórralas cuando ya no las necesites.
         Route::prefix('examples')->name('examples.')->group(function () {
             Route::get('products', [ExampleController::class, 'products'])->name('products');
@@ -59,7 +66,7 @@ Route::middleware('auth')->group(function () {
             Route::put('products/{id}', [ExampleController::class, 'updateProduct'])->whereNumber('id')->name('products.update');
             Route::delete('products/{id}', [ExampleController::class, 'destroyProduct'])->whereNumber('id')->name('products.destroy');
             Route::get('sales', [ExampleController::class, 'sales'])->name('sales');
-            Route::get('customers', [ExampleController::class, 'customers'])->name('customers');
+            Route::redirect('customers', '/admin/customers');
             Route::get('tasks', fn () => Inertia::render('admin/examples/tasks'))->name('tasks');
             Route::get('form', fn () => Inertia::render('admin/examples/form'))->name('form');
             Route::get('components', fn () => Inertia::render('admin/examples/components'))->name('components');

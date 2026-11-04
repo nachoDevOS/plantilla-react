@@ -78,7 +78,7 @@ class RolesAndPermissionsTest extends TestCase
             ->assertInertia(fn ($page) => $page->component('admin/roles/index')->has('roles.data', 4));
 
         $this->actingAs($admin)->get('/admin/roles/create')
-            ->assertInertia(fn ($page) => $page->component('admin/roles/form')->where('role', null)->has('catalog.modules', 2));
+            ->assertInertia(fn ($page) => $page->component('admin/roles/form')->where('role', null)->has('catalog.modules', 3));
 
         $this->actingAs($admin)->get("/admin/roles/{$role->id}/edit")
             ->assertInertia(fn ($page) => $page->component('admin/roles/form')->where('role.name', 'Supervisor')->has('role.permissions', 1));

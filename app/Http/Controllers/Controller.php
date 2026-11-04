@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 abstract class Controller
 {
@@ -21,6 +22,29 @@ abstract class Controller
         $value = (int) $request->input('per_page', $default);
 
         return in_array($value, self::PER_PAGE_OPTIONS, true) ? $value : $default;
+    }
+
+    /**
+     * IMAGEN SUBIDA en un formulario. La guarda StorageController en el disco de FILESYSTEM_DISK (S3): una versión normal
+     * en .avif (es la que se guarda en la base) y una recortada 300x300 en .webp.
+     * Devuelve lo que hay que guardar en la columna:
+     *   - llegó un archivo en $field  → la ruta nueva del .avif
+     *   - llegó remove_$field = true → null (se quita la imagen; el archivo queda guardado, nada se borra)
+     *   - no llegó nada              → $current (se deja la que tenía)
+     * Uso: $data['photo'] = $this->storeImage($request, 'photo', 'customers', $customer?->photo);
+     */
+    protected function storeImage(Request $request, string $field, string $folder, ?string $current = null): ?string
+    {
+        if ($request->hasFile($field)) {
+            $path = (new StorageController)->store_image($request->file($field), $folder);
+            if ($path === null) {
+                throw ValidationException::withMessages([$field => 'No se pudo guardar la imagen. Intenta de nuevo o prueba con otra.']);
+            }
+
+            return $path;
+        }
+
+        return $request->boolean("remove_{$field}") ? null : $current;
     }
 
     /**

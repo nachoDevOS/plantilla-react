@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
 
         $this->createAdmin();
         $this->createDemoUsers();
+        $this->call(CustomerSeeder::class);
     }
 
     /**

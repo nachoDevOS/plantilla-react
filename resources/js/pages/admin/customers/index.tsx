@@ -167,7 +167,10 @@ export default function CustomersIndex({ customers, filters, issuedIn, genders, 
                                                 </div>
                                             </div>
                                         </Td>
-                                        <Td className="num whitespace-nowrap">{customer.document}</Td>
+                                        <Td className="num whitespace-nowrap">
+                                            <p>{customer.document}</p>
+                                            <p className="text-muted-foreground font-mono text-[11px] tracking-wide">{customer.short_code}</p>
+                                        </Td>
                                         <Td className="hidden md:table-cell">
                                             <p>
                                                 <PhoneText countries={phoneCountries} code={customer.phone_country_code} number={customer.phone} />

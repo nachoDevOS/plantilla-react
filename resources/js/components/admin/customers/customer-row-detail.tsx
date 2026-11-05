@@ -75,7 +75,12 @@ export function CustomerRowDetail({ customer, issuedIn, genders, phoneCountries 
 
             <Block title="Registro">
                 <div className="col-span-2">
-                    <Detail label="Código">
+                    <Detail label="Código de cliente">
+                        <span className="font-mono text-xs tracking-wide break-all">{customer.short_code}</span>
+                    </Detail>
+                </div>
+                <div className="col-span-2">
+                    <Detail label="Código público">
                         <span className="font-mono text-xs tracking-wide break-all">{formatPublicCode(customer.code)}</span>
                     </Detail>
                 </div>

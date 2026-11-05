@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 /**
  * Cliente: datos personales, cédula de identidad (CI, extensión y expedido), contacto y foto.
@@ -58,6 +59,9 @@ class Customer extends Model
         '+1' => ['iso' => 'US', 'name' => 'Estados Unidos'],
     ];
 
+    /** Palabras de enlace que no cuentan como inicial: "María del Carmen" → MC */
+    private const NAME_PARTICLES = ['de', 'del', 'la', 'las', 'los', 'y'];
+
     /**
      * @var list<string>
      */
@@ -82,6 +86,25 @@ class Customer extends Model
             'birth_date' => 'date:Y-m-d',
             'is_active' => 'boolean',
         ];
+    }
+
+    /** El código corto siempre refleja los nombres y el CI actuales. */
+    protected static function booted(): void
+    {
+        static::saving(function (self $customer) {
+            $customer->short_code = $customer->makeShortCode();
+        });
+    }
+
+    /** Iniciales del nombre completo + CI: María Elena Quispe Mamani Rojas, 1234567-1A → MEQMR-1234567-1A */
+    public function makeShortCode(): string
+    {
+        $initials = collect(preg_split('/\s+/', $this->full_name, -1, PREG_SPLIT_NO_EMPTY))
+            ->reject(fn (string $word) => in_array(mb_strtolower($word), self::NAME_PARTICLES))
+            ->map(fn (string $word) => mb_substr($word, 0, 1))
+            ->implode('');
+
+        return Str::upper(Str::ascii($initials))."-{$this->ci}".(filled($this->ci_extension) ? "-{$this->ci_extension}" : '');
     }
 
     /** Nombre completo: nombres, apellidos y apellido de casada. */
@@ -110,7 +133,7 @@ class Customer extends Model
         return Attribute::get(fn () => $this->photo ? preg_replace('/\.avif$/', '-cropped.webp', $this->photo) : null);
     }
 
-    /** Busca por nombres, apellidos, CI, correo o teléfono. Cada palabra puede estar en un campo distinto. */
+    /** Busca por nombres, apellidos, CI, código corto, correo o teléfono. Cada palabra puede estar en un campo distinto. */
     public function scopeSearch(Builder $query, ?string $search): void
     {
         foreach (preg_split('/\s+/', trim((string) $search), -1, PREG_SPLIT_NO_EMPTY) as $term) {
@@ -121,6 +144,7 @@ class Customer extends Model
                 ->orWhere('second_last_name', 'like', "%{$term}%")
                 ->orWhere('married_last_name', 'like', "%{$term}%")
                 ->orWhere('ci', 'like', "{$term}%")
+                ->orWhere('short_code', 'like', "{$term}%")
                 ->orWhere('email', 'like', "%{$term}%")
                 ->orWhere('phone', 'like', "%{$term}%"));
         }

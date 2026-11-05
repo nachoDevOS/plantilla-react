@@ -14,6 +14,8 @@ export interface CustomerFilters {
 export interface Customer {
     /** Código público: reemplaza al id en las URL (trait HasPublicCode) */
     code: string;
+    /** Código corto: iniciales del nombre completo + CI, lo calcula el modelo (MEQMR-1234567-1A) */
+    short_code: string;
     /** Foto: ruta del .avif en S3 (ver lib/storage.ts) */
     photo: string | null;
     first_name: string;

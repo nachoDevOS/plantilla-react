@@ -139,6 +139,42 @@ class CustomerManagementTest extends TestCase
         $this->assertSame($code, $customer->fresh()->code);
     }
 
+    public function test_the_short_code_is_made_of_the_initials_and_the_ci()
+    {
+        $this->actingAs($this->admin())->post('/admin/customers', $this->validData())->assertSessionHasNoErrors();
+
+        $this->assertSame('MEQMR-1234567-1A', Customer::sole()->short_code);
+    }
+
+    public function test_the_short_code_skips_particles_and_accents_and_omits_an_empty_extension()
+    {
+        $customer = Customer::factory()->create([
+            'first_name' => 'Ángela', 'second_name' => 'del Carmen', 'first_last_name' => 'Égüez', 'second_last_name' => null, 'ci' => '7654321',
+        ]);
+
+        $this->assertSame('ACE-7654321', $customer->short_code);
+    }
+
+    public function test_the_short_code_follows_the_data_and_cannot_be_set_from_the_form()
+    {
+        $customer = Customer::factory()->create(['ci' => '1234567', 'ci_extension' => '1A']);
+
+        $this->actingAs($this->admin())
+            ->put("/admin/customers/{$customer->code}", $this->validData(['first_name' => 'Ana', 'second_name' => '', 'short_code' => 'XXX']))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('AQMR-1234567-1A', $customer->fresh()->short_code);
+    }
+
+    public function test_customers_can_be_searched_by_their_short_code()
+    {
+        $customer = Customer::factory()->create(['first_name' => 'Luis', 'second_name' => null, 'first_last_name' => 'Vargas', 'second_last_name' => null, 'ci' => '7654321']);
+        Customer::factory()->create();
+
+        $this->actingAs($this->admin())->get('/admin/customers?search=LV-7654321')
+            ->assertInertia(fn (Assert $page) => $page->has('customers.data', 1)->where('customers.data.0.code', $customer->code));
+    }
+
     public function test_the_location_is_saved_with_both_coordinates()
     {
         $this->actingAs($this->admin())->post('/admin/customers', $this->validData(['latitude' => '-14.8333123', 'longitude' => '-64.9012345']))

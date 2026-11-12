@@ -22,7 +22,7 @@ export function UsersToolbar({ filters, roles, onFilter }: UsersToolbarProps) {
             searchPlaceholder="Buscar por nombre o correo..."
         >
             <Select value={filters.role ?? ALL} onValueChange={(role) => onFilter({ role })}>
-                <SelectTrigger className="h-9 w-40">
+                <SelectTrigger className="h-control w-40">
                     <SelectValue placeholder="Rol" />
                 </SelectTrigger>
                 <SelectContent>
@@ -35,7 +35,7 @@ export function UsersToolbar({ filters, roles, onFilter }: UsersToolbarProps) {
                 </SelectContent>
             </Select>
             <Select value={filters.status ?? ALL} onValueChange={(status) => onFilter({ status })}>
-                <SelectTrigger className="h-9 w-36">
+                <SelectTrigger className="h-control w-36">
                     <SelectValue placeholder="Estado" />
                 </SelectTrigger>
                 <SelectContent>

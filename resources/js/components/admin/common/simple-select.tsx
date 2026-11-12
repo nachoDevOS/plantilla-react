@@ -9,7 +9,6 @@
  */
 import { ALL } from '@/components/admin/common/table-toolbar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
 
 interface SimpleSelectProps {
     options: { id: number | string; name: string }[];
@@ -27,7 +26,7 @@ export function SimpleSelect({ options, value, onChange, placeholder = 'Seleccio
 
     return (
         <Select value={current} onValueChange={onChange} disabled={disabled}>
-            <SelectTrigger id={id} className={cn('h-9', className)}>
+            <SelectTrigger id={id} className={className}>
                 <SelectValue placeholder={placeholder} />
             </SelectTrigger>
             <SelectContent>

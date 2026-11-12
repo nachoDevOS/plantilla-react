@@ -108,7 +108,7 @@ export function UserFormDialog({ open, onClose, user, roles }: { open: boolean; 
                         </div>
                         <div className="grid gap-2">
                             <Label>Estado</Label>
-                            <label className="flex h-10 cursor-pointer items-center gap-3 rounded-md border px-3">
+                            <label className="h-control flex cursor-pointer items-center gap-3 rounded-md border px-3">
                                 <Checkbox checked={data.is_active} onCheckedChange={(checked) => setData('is_active', checked === true)} />
                                 <span className="text-sm">Cuenta activa</span>
                             </label>

@@ -33,7 +33,7 @@ export function PhoneInput({ id, countries, code, number, onCodeChange, onNumber
     return (
         <div className="flex">
             <Select value={code} onValueChange={onCodeChange}>
-                <SelectTrigger aria-label="Código de país" className="h-10 w-[116px] shrink-0 rounded-r-none border-r-0 focus:z-10">
+                <SelectTrigger aria-label="Código de país" className="h-control w-[116px] shrink-0 rounded-r-none border-r-0 focus:z-10">
                     <SelectValue>
                         {selected && (
                             <span className="flex items-center gap-2">

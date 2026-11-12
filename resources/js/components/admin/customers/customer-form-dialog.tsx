@@ -190,7 +190,6 @@ export function CustomerFormDialog({ open, onClose, customer, issuedIn, genders,
                                     <Field label="Expedido" required htmlFor="ci_issued_in" error={errors.ci_issued_in}>
                                         <SimpleSelect
                                             id="ci_issued_in"
-                                            className="h-10"
                                             options={issuedOptions}
                                             value={data.ci_issued_in}
                                             onChange={(value) => setData('ci_issued_in', value)}
@@ -207,7 +206,6 @@ export function CustomerFormDialog({ open, onClose, customer, issuedIn, genders,
                                     <Field label="Género" htmlFor="gender" error={errors.gender}>
                                         <SimpleSelect
                                             id="gender"
-                                            className="h-10"
                                             options={genderOptions}
                                             value={data.gender}
                                             onChange={(value) => setData('gender', value)}
@@ -252,7 +250,7 @@ export function CustomerFormDialog({ open, onClose, customer, issuedIn, genders,
                                         className="border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-hidden"
                                     />
                                 </Field>
-                                <label className="flex h-10 w-fit cursor-pointer items-center gap-3 rounded-md border px-3">
+                                <label className="h-control flex w-fit cursor-pointer items-center gap-3 rounded-md border px-3">
                                     <Checkbox checked={data.is_active} onCheckedChange={(checked) => setData('is_active', checked === true)} />
                                     <span className="text-sm">Cliente activo</span>
                                 </label>

@@ -321,12 +321,7 @@ function ProductFormDialog({ product, categories, onClose }: ProductFormDialogPr
                             <Input value={data.brand} onChange={(e) => setData('brand', e.target.value)} placeholder="Ej: PIL" />
                         </Field>
                         <Field label="Categoría *" error={errors.category}>
-                            <SimpleSelect
-                                className="h-10"
-                                options={categories}
-                                value={data.category}
-                                onChange={(value) => setData('category', value)}
-                            />
+                            <SimpleSelect options={categories} value={data.category} onChange={(value) => setData('category', value)} />
                         </Field>
                         <Field label="Precio (Bs) *" error={errors.price}>
                             <Input type="number" step="0.01" min="0" value={data.price} onChange={(e) => setData('price', e.target.value)} />

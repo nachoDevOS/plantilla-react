@@ -2,7 +2,10 @@
  * Utilidades generales sin diseño.
  */
 import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { extendTailwindMerge } from 'tailwind-merge';
+
+/** Enseña a twMerge el tamaño propio `control` (--spacing-control en app.css) para que `h-8` reemplace a `h-control`. */
+const twMerge = extendTailwindMerge({ extend: { theme: { spacing: ['control'] } } });
 
 /**
  * Combina clases de Tailwind sin conflictos.

@@ -189,7 +189,6 @@ export default function ExampleForm() {
                                 <div className="grid gap-4 sm:grid-cols-2">
                                     <Field label="Ciudad" required error={errors.city}>
                                         <SimpleSelect
-                                            className="h-10"
                                             options={cities}
                                             value={data.city}
                                             onChange={(value) => set('city', value)}

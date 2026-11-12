@@ -78,7 +78,7 @@ export function TableToolbar({ perPage, onPerPageChange, search, onSearch, searc
                 <div className="text-muted-foreground flex items-center gap-2 text-sm">
                     <span>Mostrar</span>
                     <Select value={String(perPage)} onValueChange={(value) => onPerPageChange(Number(value))}>
-                        <SelectTrigger className="h-9 w-[4.5rem]" aria-label="Registros por página">
+                        <SelectTrigger className="h-control w-[4.5rem]" aria-label="Registros por página">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -103,7 +103,7 @@ export function TableToolbar({ perPage, onPerPageChange, search, onSearch, searc
                     onChange={(e) => setText(e.target.value)}
                     onKeyDown={onKeyDown}
                     placeholder={searchPlaceholder}
-                    className="h-9 pr-16 pl-9"
+                    className="h-control pr-16 pl-9"
                     aria-label="Buscar (presiona Enter)"
                 />
                 {/* Aviso "Enter" mientras hay texto sin buscar */}

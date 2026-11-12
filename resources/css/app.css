@@ -8,6 +8,8 @@
 
 /* Fuentes y colores que Tailwind convierte en clases (ej: font-display, bg-primary, text-muted-foreground) */
 @theme {
+    /* Alto de inputs y selects de todo el sistema (clase h-control). Cambia aquí para ajustarlo. */
+    --spacing-control: 35px;
     --font-sans:
         'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     --font-display: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;

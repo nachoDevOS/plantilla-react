@@ -12,6 +12,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { ClipboardList, Contact, LayoutGrid, Package, Palette, Settings, Shapes, ShieldCheck, ShoppingCart, SquareKanban, Users } from 'lucide-react';
+import { useLayoutEffect, useRef } from 'react';
 
 // Grupo "Plataforma": lo ve todo usuario logueado
 const mainNavItems: NavItem[] = [
@@ -68,7 +69,17 @@ const footerNavItems: NavItem[] = [
     },
 ];
 
+// Posición del scroll del menú. Vive fuera del componente porque el menú se vuelve a montar en cada cambio de página
+let menuScroll = 0;
+
 export function AdminSidebar() {
+    const contentRef = useRef<HTMLDivElement>(null);
+
+    // Al montar, vuelve a la posición donde estaba el menú (si no, arranca siempre desde arriba)
+    useLayoutEffect(() => {
+        if (contentRef.current) contentRef.current.scrollTop = menuScroll;
+    }, []);
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -87,7 +98,7 @@ export function AdminSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent>
+            <SidebarContent ref={contentRef} onScroll={(e) => (menuScroll = e.currentTarget.scrollTop)}>
                 <NavMain label="Plataforma" items={mainNavItems} />
                 <NavMain label="Ejemplos" items={exampleNavItems} />
                 <NavMain label="Administración" items={adminNavItems} />
